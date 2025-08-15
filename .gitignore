@@ -138,5 +138,3 @@ ecosystem.config.js
 # Prettier
 .prettierignore
 
-# Client directory (separate git repository)
-client/
