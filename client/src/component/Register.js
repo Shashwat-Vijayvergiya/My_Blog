@@ -25,8 +25,6 @@ const Register= ()=>{
             body:JSON.stringify({username,password}),
             credentials: 'include',
         })
-
-        })
         if(response.status === 200){
             alert('registration success');
             navigate('/login');
