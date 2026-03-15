@@ -20,7 +20,7 @@ export default function PostPage(){
     if(!postInfo) return '';
     return(
         <div className="post-page">
-           {userInfo.id === postInfo.author._id &&(
+           {userInfo?.id === postInfo?.author?._id &&(
             <div className="edit-row">
                 <Link className="edit-btn" to={`/edit/${postInfo._id}`}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -35,7 +35,7 @@ export default function PostPage(){
             </div>
            <h1>{postInfo.title}</h1>
            <time>{format(new Date(postInfo.createdAt),'MMM d, yyyy HH:mm')}</time>
-           <div className="author">by {postInfo.author.username}</div>
+           <div className="author">by {postInfo?.author?.username}</div>
            <div className="content" dangerouslySetInnerHTML={{__html:postInfo.content}}/>
         </div>
     )
