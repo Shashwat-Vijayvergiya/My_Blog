@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const { default: mongoose } = require('mongoose');
+const mongoose = require('mongoose');
 const app = express();
 const User = require('./model/user');
 const jwt = require('jsonwebtoken');
@@ -168,7 +168,10 @@ app.get('/post', async (req, res) => {
         res.json(posts);
     } catch (err) {
         console.error('Error fetching posts:', err);
-        res.status(500).json('Error fetching posts');
+        res.status(500).json({
+            message: 'Error fetching posts',
+            error: err.message
+        });
     }
 })
 
