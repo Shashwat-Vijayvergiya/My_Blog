@@ -15,7 +15,17 @@ const Post = require('./model/Post');
 const secret = process.env.JWT_SECRET || 'nvpfuvbaiwfavieri';
 const salt = bcrypt.genSaltSync(parseInt(process.env.SALT_ROUNDS) || 10);
 
-app.use(cors({credentials:true,origin:process.env.CLIENT_URL || 'http://localhost:3000'}));
+const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3000'].filter(Boolean);
+app.use(cors({
+    credentials: true,
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
+}));
 app.use(express.json());
 app.use(cookieparser());
 app.use('/uploads',express.static(__dirname+'/uploads'));
@@ -49,8 +59,11 @@ app.post('/login',async(req,res)=>{
         if(passOk){
             jwt.sign({username,id:UserDoc._id},secret,{},(err,token)=>{
                 if(err) throw err;
-                res.cookie('token',token).json({
-                    id:UserDoc._id,
+                res.cookie('token', token, {
+                    sameSite: 'none',
+                    secure: true,
+                }).json({
+                    id: UserDoc._id,
                     username,
                 });
             })
@@ -75,8 +88,11 @@ app.get('/profile',(req,res)=>{
 })
 
 app.post('/logout',(req,res)=>{
-    res.cookie('token','').json('ok');
-})
+    res.cookie('token', '', {
+        sameSite: 'none',
+        secure: true,
+    }).json('ok');
+});
 
 app.post('/post',uploadMiddleware.single('files'),async (req,res)=>{
     // res.json(req.file);
@@ -135,8 +151,17 @@ app.put('/post',uploadMiddleware.single('files'), async(req,res) =>{
     });
 });
 
-app.get('/post',async(req,res)=>{
-    res.json(await Post.find().populate('author',['username']).sort({createdAt: -1}).limit(20));
+app.get('/post', async (req, res) => {
+    try {
+        const posts = await Post.find()
+            .populate('author', ['username'])
+            .sort({ createdAt: -1 })
+            .limit(20);
+        res.json(posts);
+    } catch (err) {
+        console.error('Error fetching posts:', err);
+        res.status(500).json('Error fetching posts');
+    }
 })
 
 app.get('/post/:id',async(req,res)=>{
