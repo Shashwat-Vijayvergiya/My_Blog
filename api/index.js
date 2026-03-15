@@ -16,12 +16,16 @@ const secret = process.env.JWT_SECRET || 'nvpfuvbaiwfavieri';
 const salt = bcrypt.genSaltSync(parseInt(process.env.SALT_ROUNDS) || 10);
 
 const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3000'].filter(Boolean);
+console.log('Allowed Origins:', allowedOrigins);
+
 app.use(cors({
     credentials: true,
     origin: function (origin, callback) {
+        console.log('Request Origin:', origin);
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.error('CORS blocked for origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     }
@@ -33,6 +37,10 @@ app.use('/uploads',express.static(__dirname+'/uploads'));
 mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', time: new Date().toISOString() });
+});
 
 
 app.post('/register', async(req,res)=>{
